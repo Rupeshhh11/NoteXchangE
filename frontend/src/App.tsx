@@ -85,7 +85,7 @@ function App() {
                             }
                         />
 
-                        {/* Admin Routes */}
+
                         <Route
                             path="/admin/dashboard"
                             element={
@@ -107,13 +107,6 @@ function App() {
                 <Toaster position="bottom-right" />
             </div>
         </Router>
-    );
-}
-
-export default App;
-<Toaster position="top-right" />
-            </div >
-        </Router >
     );
 }
 
