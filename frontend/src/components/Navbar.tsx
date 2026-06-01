@@ -14,51 +14,47 @@ export default function Navbar() {
     };
 
     return (
-        <nav className="sticky top-0 z-50 backdrop-blur-md border-b border-gray-200">
-            <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-                {/* Logo */}
-                <Link
-                    to="/"
-                    className="text-2xl font-bold font-display"
-                >
-                    <span className="text-primary">Note</span>
-                    <span className="text-primary">X</span>
-                    <span className="text-gray-800">changE</span>
+        <header className="main-header">
+            <div className="header-container">
+                {/* Logo Group */}
+                <Link to="/" className="logo-group" style={{ textDecoration: 'none' }}>
+                    <span className="logo-text">
+                        Note<span className="logo-x">X</span><span className="logotext">changE</span>
+                    </span>
                 </Link>
 
                 {/* Desktop Navigation */}
-                <div className="hidden md:flex gap-6 items-center">
-                    <Link to="/" className="hover:text-primary transition">
-                        Home
-                    </Link>
-                    <Link to="/browse" className="hover:text-primary transition">
-                        Browse Tasks
-                    </Link>
+                <nav className="main-nav">
+                    <a href="#" className="nav-link">
+                        About
+                    </a>
+                    <a href="#" className="nav-link">
+                        How it Works
+                    </a>
+                    <a href="#" className="nav-link">
+                        Community
+                    </a>
                     {isAuthenticated && (
-                        <>
-                            <Link to="/dashboard" className="hover:text-primary transition">
-                                Dashboard
-                            </Link>
-                            <Link to="/messages" className="hover:text-primary transition">
-                                Messages
-                            </Link>
-                        </>
+                        <Link to="/dashboard" className="nav-link">
+                            Dashboard
+                        </Link>
                     )}
-                </div>
+                </nav>
 
-                {/* Right Section */}
-                <div className="hidden md:flex gap-3 items-center">
+                {/* Right / Auth Buttons */}
+                <div className="auth-buttons">
                     {isAuthenticated ? (
                         <>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2" style={{ marginRight: '1rem' }}>
                                 <User className="w-5 h-5" />
-                                <span className="text-sm">{user?.firstName}</span>
+                                <span className="text-sm font-medium">{user?.firstName}</span>
                             </div>
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                                className="btn btn-secondary"
+                                style={{ color: 'red' }}
                             >
-                                <LogOut className="w-4 h-4" />
+                                <LogOut className="w-4 h-4 mr-1" />
                                 Logout
                             </button>
                         </>
@@ -66,51 +62,59 @@ export default function Navbar() {
                         <>
                             <Link
                                 to="/login"
-                                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                                className="btn btn-secondary"
                             >
-                                Login
+                                Log In
                             </Link>
                             <Link
                                 to="/register"
-                                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition"
+                                className="btn btn-primary"
                             >
                                 Sign Up
                             </Link>
                         </>
                     )}
+                    
+                    {/* Mobile Menu Button */}
+                    <button
+                        className="md:hidden ml-2 btn btn-secondary"
+                        onClick={() => setIsOpen(!isOpen)}
+                        style={{ padding: '0 0.5rem', width: '2.5rem' }}
+                    >
+                        {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                    </button>
                 </div>
-
-                {/* Mobile Menu Button */}
-                <button
-                    className="md:hidden"
-                    onClick={() => setIsOpen(!isOpen)}
-                >
-                    {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                </button>
             </div>
 
             {/* Mobile Menu */}
             {isOpen && (
-                <div className="md:hidden border-t px-4 py-4 space-y-3">
-                    <Link
-                        to="/"
-                        className="block hover:text-primary transition"
+                <div className="md:hidden border-t px-4 py-4 space-y-3" style={{ background: 'var(--clr-card-bg)', backdropFilter: 'blur(5px)' }}>
+                    <a
+                        href="#"
+                        className="block hover:text-primary transition font-medium"
                         onClick={() => setIsOpen(false)}
                     >
-                        Home
-                    </Link>
-                    <Link
-                        to="/browse"
-                        className="block hover:text-primary transition"
+                        About
+                    </a>
+                    <a
+                        href="#"
+                        className="block hover:text-primary transition font-medium"
                         onClick={() => setIsOpen(false)}
                     >
-                        Browse Tasks
-                    </Link>
+                        How it Works
+                    </a>
+                    <a
+                        href="#"
+                        className="block hover:text-primary transition font-medium"
+                        onClick={() => setIsOpen(false)}
+                    >
+                        Community
+                    </a>
                     {isAuthenticated ? (
                         <>
                             <Link
                                 to="/dashboard"
-                                className="block hover:text-primary transition"
+                                className="block hover:text-primary transition font-medium"
                                 onClick={() => setIsOpen(false)}
                             >
                                 Dashboard
@@ -120,23 +124,23 @@ export default function Navbar() {
                                     handleLogout();
                                     setIsOpen(false);
                                 }}
-                                className="w-full text-left text-red-600 hover:bg-red-50 px-2 py-1 rounded transition"
+                                className="w-full text-left text-red-600 hover:bg-red-50 px-2 py-1 rounded transition font-medium"
                             >
                                 Logout
                             </button>
                         </>
                     ) : (
                         <>
-                            <Link to="/login" className="block" onClick={() => setIsOpen(false)}>
-                                Login
+                            <Link to="/login" className="block hover:text-primary transition font-medium" onClick={() => setIsOpen(false)}>
+                                Log In
                             </Link>
-                            <Link to="/register" className="block" onClick={() => setIsOpen(false)}>
+                            <Link to="/register" className="block hover:text-primary transition font-medium" onClick={() => setIsOpen(false)}>
                                 Sign Up
                             </Link>
                         </>
                     )}
                 </div>
             )}
-        </nav>
+        </header>
     );
 }
