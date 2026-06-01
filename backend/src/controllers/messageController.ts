@@ -3,7 +3,6 @@ import { AuthenticatedRequest } from '../middleware/auth';
 import Message from '../models/Message';
 import User from '../models/User';
 
-// Send message
 export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const { recipientId, taskId, message, attachments } = req.body;
@@ -25,7 +24,6 @@ export const sendMessage = async (req: AuthenticatedRequest, res: Response) => {
     }
 };
 
-// Get messages between users
 export const getMessages = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const { recipientId } = req.params;

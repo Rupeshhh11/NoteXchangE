@@ -4,7 +4,6 @@ import Wallet from '../models/Wallet';
 import { generateTokens } from '../utils/tokenUtils';
 import nodemailer from 'nodemailer';
 
-// Email transporter setup
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT || '587'),
@@ -86,10 +85,8 @@ export const login = async (req: Request, res: Response) => {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        // Update last login
         user.lastLogin = new Date();
         await user.save();
-
         const { accessToken, refreshToken } = generateTokens(user.id, user.role);
 
         res.status(200).json({

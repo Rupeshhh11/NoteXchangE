@@ -4,7 +4,6 @@ import User from '../models/User';
 
 const router = Router();
 
-// Get user profile
 router.get('/:id', async (req: Request, res: Response) => {
     try {
         const user = await User.findByPk(req.params.id, {
@@ -21,7 +20,6 @@ router.get('/:id', async (req: Request, res: Response) => {
     }
 });
 
-// Update user profile
 router.put('/:id', authenticate, async (req: AuthenticatedRequest, res: Response) => {
     try {
         if (req.userId !== req.params.id && req.userRole !== 'admin') {

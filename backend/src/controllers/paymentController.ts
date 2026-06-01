@@ -4,7 +4,6 @@ import Payment from '../models/Payment';
 import Task from '../models/Task';
 import Wallet from '../models/Wallet';
 
-// Create payment order (Razorpay)
 export const createPaymentOrder = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const { taskId, amount } = req.body;
@@ -30,7 +29,6 @@ export const createPaymentOrder = async (req: AuthenticatedRequest, res: Respons
     }
 };
 
-// Verify payment
 export const verifyPayment = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const { paymentId, razorpayOrderId, razorpaySignature } = req.body;

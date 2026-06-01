@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../hooks/useAuth';
 
-// Mock requests from idk/script.js as fallback/mock data
 const mockRequests = [
     { id: 1, category: 'Notes Writing', title: 'Advanced Calculus', pages: 15, budget: 75, status: 'Rate Fixed', postedBy: 'Alex009. • Mango', color: 'blue', canDelete: false },
     { id: 2, category: 'Assignment', title: 'History Essay', pages: 4, budget: 40, status: 'Rate Fixed', postedBy: 'Sonali013. • Sakchi', color: 'green', canDelete: false },
@@ -15,13 +14,9 @@ const mockRequests = [
 export default function Home() {
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
-
-    // List of requests combining API data (if any) and local/mock data
     const [requests, setRequests] = useState<any[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [showPostModal, setShowPostModal] = useState(false);
-
-    // Form states
     const [formCategory, setFormCategory] = useState('notes');
     const [formSubject, setFormSubject] = useState('');
     const [formPages, setFormPages] = useState('');
@@ -29,66 +24,54 @@ export default function Home() {
     const [formDetails, setFormDetails] = useState('');
 
     useEffect(() => {
-        // Trigger GSAP entrance animations safely
         const gsap = (window as any).gsap;
         if (gsap) {
             gsap.from(".hero-title", { y: 20, opacity: 0, duration: 0.8, ease: "power2.out" });
             gsap.from(".hero-description", { y: 20, opacity: 0, duration: 0.8, delay: 0.2, ease: "power2.out" });
             gsap.from(".hero-actions", { y: 20, opacity: 0, duration: 0.8, delay: 0.4, ease: "power2.out" });
         }
-
         fetchTasks();
     }, []);
 
     const fetchTasks = async () => {
         try {
-            // Load custom posts from localStorage first if any (prototype functionality)
             const localPosts = JSON.parse(localStorage.getItem('notex_requests') || '[]');
-            
-            // Try fetching from real backend API
-            const response = await axios.get('/api/tasks');
-            const apiTasks = response.data.tasks || [];
-
-            // Map API tasks to our UI card format
-            const mappedApiTasks = apiTasks.map((t: any) => {
-                let color = 'blue';
-                if (t.category.toLowerCase().includes('assign')) color = 'green';
-                else if (t.category.toLowerCase().includes('lab')) color = 'purple';
-                else if (t.category.toLowerCase().includes('project')) color = 'orange';
-
-                return {
-                    id: t.id,
-                    category: t.category,
-                    title: t.title,
-                    pages: 'N/A', // or details
-                    budget: Math.floor(t.budget),
-                    status: t.status === 'open' ? 'Acquire' : 'In Progress',
-                    postedBy: 'Student',
-                    color,
-                    isRealTask: true
-                };
-            });
-
-            // Combine local prototype tasks + API tasks + mock fallbacks
-            let combined = [...localPosts, ...mappedApiTasks];
-            if (combined.length === 0) {
-                combined = mockRequests;
+            try {
+                const response = await axios.get('/api/tasks');
+                const apiTasks = response.data.tasks || [];
+                const mappedApiTasks = apiTasks.map((t: any) => {
+                    let color = 'blue';
+                    if (t.category.toLowerCase().includes('assign')) color = 'green';
+                    else if (t.category.toLowerCase().includes('lab')) color = 'purple';
+                    else if (t.category.toLowerCase().includes('project')) color = 'orange';
+                    return {
+                        id: t.id,
+                        category: t.category,
+                        title: t.title,
+                        pages: 'N/A',
+                        budget: Math.floor(t.budget),
+                        status: t.status === 'open' ? 'Acquire' : 'In Progress',
+                        postedBy: 'Student',
+                        color,
+                        isRealTask: true
+                    };
+                });
+                let combined = [...localPosts, ...mappedApiTasks];
+                setRequests(combined.length > 0 ? combined : mockRequests);
+            } catch (err) {
+                const combined = [...localPosts, ...mockRequests];
+                setRequests(combined.length > 0 ? combined : mockRequests);
             }
-            setRequests(combined);
         } catch (error) {
-            console.log('Backend tasks not available, showing mock requests instead.');
-            const localPosts = JSON.parse(localStorage.getItem('notex_requests') || '[]');
-            setRequests(localPosts.length > 0 ? [...localPosts, ...mockRequests] : mockRequests);
+            setRequests(mockRequests);
         }
     };
 
-    // Form Submission
     const handlePostSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const pagesVal = parseFloat(formPages) || 0;
         const rateVal = parseFloat(formBudget) || 0;
         const totalBudget = pagesVal > 0 ? (pagesVal * rateVal) : rateVal;
-
         const categoryMap: Record<string, { name: string; color: string }> = {
             'notes': { name: 'Notes Writing', color: 'blue' },
             'assignment': { name: 'Assignment', color: 'green' },
@@ -96,7 +79,6 @@ export default function Home() {
             'project': { name: 'Project', color: 'orange' }
         };
         const config = categoryMap[formCategory] || { name: 'Other', color: 'blue' };
-
         const newEntry = {
             id: Date.now().toString(),
             category: config.name,
@@ -108,8 +90,6 @@ export default function Home() {
             color: config.color,
             canDelete: true
         };
-
-        // If user is authenticated, we also attempt to save it to the backend DB
         if (isAuthenticated) {
             try {
                 await axios.post('/api/tasks', {
@@ -117,19 +97,15 @@ export default function Home() {
                     description: formDetails || 'No additional details provided.',
                     category: config.name,
                     budget: totalBudget,
-                    deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
+                    deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
                 });
             } catch (err) {
-                console.error('Failed to post task to backend DB:', err);
+                console.error('Failed to post task:', err);
             }
         }
-
-        // Always save to localStorage for prototype visual responsiveness
         const localPosts = JSON.parse(localStorage.getItem('notex_requests') || '[]');
         const updated = [newEntry, ...localPosts];
         localStorage.setItem('notex_requests', JSON.stringify(updated));
-
-        // Reset and close
         setFormSubject('');
         setFormPages('');
         setFormBudget('');
@@ -140,19 +116,13 @@ export default function Home() {
 
     const handleDeleteRequest = (id: any) => {
         if (window.confirm('Are you sure you want to delete this request?')) {
-            // Delete from local storage
             const localPosts = JSON.parse(localStorage.getItem('notex_requests') || '[]');
             const updated = localPosts.filter((req: any) => req.id !== id);
             localStorage.setItem('notex_requests', JSON.stringify(updated));
-
-            // Also delete from local state
             setRequests(prev => prev.filter(req => req.id !== id));
         }
     };
-
-    // Filter requests
-    const filteredRequests = selectedCategory
-        ? requests.filter(req => req.category.toLowerCase().includes(selectedCategory.toLowerCase().split(' ')[0]))
+        ?requests.filter(req => req.category.toLowerCase().includes(selectedCategory.toLowerCase().split(' ')[0]))
         : requests;
 
     const getIconSvg = (category: string, color: string) => {
@@ -195,7 +165,7 @@ export default function Home() {
     return (
         <>
             <main className="main-content-area">
-                
+
                 {/* Hero Section */}
                 <div className="hero-section">
                     <h1 id="hero-title" className="hero-title">
@@ -204,15 +174,15 @@ export default function Home() {
                     <p id="hero-desc" className="hero-description">
                         An academic collaboration platform designed to connect students who need academic work with those who can deliver it and earn.
                     </p>
-                    
+
                     {/* Autoplay Video Loop Backdrop */}
                     <div className="back10">
                         <video src="/0_3d_Model_Dragon_3840x2160.mp4" muted autoPlay loop playsInline></video>
                     </div>
 
                     <div id="hero-buttons" className="hero-actions">
-                        <button 
-                            onClick={() => setShowPostModal(true)} 
+                        <button
+                            onClick={() => setShowPostModal(true)}
                             className="btn btn-primary btn-lg btn-rounded btn-shadow"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-mr">
@@ -221,7 +191,7 @@ export default function Home() {
                             </svg>
                             Post a Request
                         </button>
-                        <button 
+                        <button
                             onClick={() => navigate('/browse')}
                             className="btn btn-ghost btn-lg btn-rounded"
                         >
@@ -236,7 +206,7 @@ export default function Home() {
 
                 {/* Category Grid */}
                 <div className="category-grid">
-                    <div 
+                    <div
                         onClick={() => setSelectedCategory(selectedCategory === 'Notes Writing' ? null : 'Notes Writing')}
                         className="category-card"
                         style={{ border: selectedCategory === 'Notes Writing' ? '2px solid #df5d01' : '' }}
@@ -250,7 +220,7 @@ export default function Home() {
                         <h3 className="card-title">Notes Writing</h3>
                     </div>
 
-                    <div 
+                    <div
                         onClick={() => setSelectedCategory(selectedCategory === 'Assignment' ? null : 'Assignment')}
                         className="category-card"
                         style={{ border: selectedCategory === 'Assignment' ? '2px solid #df5d01' : '' }}
@@ -262,7 +232,7 @@ export default function Home() {
                         <h3 className="card-title">Assignments</h3>
                     </div>
 
-                    <div 
+                    <div
                         onClick={() => setSelectedCategory(selectedCategory === 'Lab Manual' ? null : 'Lab Manual')}
                         className="category-card"
                         style={{ border: selectedCategory === 'Lab Manual' ? '2px solid #df5d01' : '' }}
@@ -277,7 +247,7 @@ export default function Home() {
                         <h3 className="card-title">Lab Manuals</h3>
                     </div>
 
-                    <div 
+                    <div
                         onClick={() => setSelectedCategory(selectedCategory === 'Project' ? null : 'Project')}
                         className="category-card"
                         style={{ border: selectedCategory === 'Project' ? '2px solid #df5d01' : '' }}
@@ -298,15 +268,15 @@ export default function Home() {
                     </h2>
                     <div className="requests-actions">
                         {selectedCategory && (
-                            <button 
-                                onClick={() => setSelectedCategory(null)} 
+                            <button
+                                onClick={() => setSelectedCategory(null)}
                                 className="btn-clear-filter"
                             >
                                 Clear Filter
                             </button>
                         )}
-                        <button 
-                            onClick={() => navigate('/browse')} 
+                        <button
+                            onClick={() => navigate('/browse')}
                             className="btn btn-text-link"
                         >
                             View All
@@ -325,7 +295,7 @@ export default function Home() {
                             <div>
                                 <div className="card-header">
                                     <div className="header-left" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                        {getIconSvg(req.category, req.color)} 
+                                        {getIconSvg(req.category, req.color)}
                                         <span className="text-xs font-medium text-muted-foreground">{req.category}</span>
                                     </div>
                                 </div>
@@ -338,11 +308,11 @@ export default function Home() {
                             <div className="price-group" style={{ position: 'relative', height: '1.5rem', marginTop: 'auto' }}>
                                 <span className="request-price" style={{ bottom: '0.5rem', color: '#05b34d' }}>₹{req.budget}</span>
                             </div>
-                            <hr />   
+                            <hr />
                             <div className="request-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0' }}>
                                 {req.canDelete ? (
-                                    <button 
-                                        className="btn-delete" 
+                                    <button
+                                        className="btn-delete"
                                         onClick={() => handleDeleteRequest(req.id)}
                                         style={{ position: 'static', padding: '0.25rem 0.5rem', margin: '0' }}
                                     >
@@ -353,7 +323,7 @@ export default function Home() {
                                     <Link to={req.isRealTask ? `/tasks/${req.id}` : '#'} className="btn btn-text-link request-link" style={{ fontSize: '0.85rem' }}>
                                         View Details
                                     </Link>
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             if (req.isRealTask) navigate(`/tasks/${req.id}`);
                                             else alert('Acquire request initialized for ' + req.title);
@@ -383,10 +353,10 @@ export default function Home() {
                             <div className="form-grid-2">
                                 <div className="form-group">
                                     <label className="form-label" style={{ fontWeight: '500', marginBottom: '0.25rem' }}>Category</label>
-                                    <select 
-                                        value={formCategory} 
+                                    <select
+                                        value={formCategory}
                                         onChange={(e) => setFormCategory(e.target.value)}
-                                        className="form-inputt" 
+                                        className="form-inputt"
                                         required
                                     >
                                         <option value="notes">Notes Writing</option>
@@ -397,12 +367,12 @@ export default function Home() {
                                 </div>
                                 <div className="form-group">
                                     <label className="form-label" style={{ fontWeight: '500', marginBottom: '0.25rem' }}>Subject / Title</label>
-                                    <input 
+                                    <input
                                         value={formSubject}
                                         onChange={(e) => setFormSubject(e.target.value)}
-                                        className="form-input" 
-                                        placeholder="e.g. Calculus II" 
-                                        required 
+                                        className="form-input"
+                                        placeholder="e.g. Calculus II"
+                                        required
                                     />
                                 </div>
                             </div>
@@ -410,22 +380,22 @@ export default function Home() {
                             <div className="form-grid-2" style={{ marginTop: '0.75rem' }}>
                                 <div className="form-group">
                                     <label className="form-label" style={{ fontWeight: '500', marginBottom: '0.25rem' }}>No. of Pages (Optional)</label>
-                                    <input 
+                                    <input
                                         type="number"
                                         value={formPages}
                                         onChange={(e) => setFormPages(e.target.value)}
-                                        className="form-input" 
-                                        placeholder="10" 
+                                        className="form-input"
+                                        placeholder="10"
                                     />
                                 </div>
                                 <div className="form-group">
                                     <label className="form-label" style={{ fontWeight: '500', marginBottom: '0.25rem' }}>Budget Per Page (or Total Budget)</label>
-                                    <input 
+                                    <input
                                         type="number"
                                         value={formBudget}
                                         onChange={(e) => setFormBudget(e.target.value)}
-                                        className="form-input" 
-                                        placeholder="₹5" 
+                                        className="form-input"
+                                        placeholder="₹5"
                                         required
                                     />
                                 </div>
@@ -433,10 +403,10 @@ export default function Home() {
 
                             <div className="form-group" style={{ marginTop: '0.75rem' }}>
                                 <label className="form-label" style={{ fontWeight: '500', marginBottom: '0.25rem' }}>Additional Details</label>
-                                <textarea 
+                                <textarea
                                     value={formDetails}
                                     onChange={(e) => setFormDetails(e.target.value)}
-                                    className="form-textarea" 
+                                    className="form-textarea"
                                     placeholder="Specific requirements..."
                                     style={{ width: '95%', minHeight: '4.5rem' }}
                                 />

@@ -4,7 +4,6 @@ import Review from '../models/Review';
 import Task from '../models/Task';
 import User from '../models/User';
 
-// Create review
 export const createReview = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const { taskId, toUserId, rating, comment } = req.body;

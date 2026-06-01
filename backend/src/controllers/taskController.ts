@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { AuthenticatedRequest } from '../middleware/auth';
 import Task from '../models/Task';
 
-// Get all tasks
 export const getAllTasks = async (req: Request, res: Response) => {
     try {
         const { category, status, page = 1, limit = 10 } = req.query;
@@ -31,7 +30,6 @@ export const getAllTasks = async (req: Request, res: Response) => {
     }
 };
 
-// Create new task
 export const createTask = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const task = await Task.create({
@@ -48,7 +46,6 @@ export const createTask = async (req: AuthenticatedRequest, res: Response) => {
     }
 };
 
-// Get task by ID
 export const getTaskById = async (req: Request, res: Response) => {
     try {
         const task = await Task.findByPk(req.params.id);

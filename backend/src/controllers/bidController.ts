@@ -4,7 +4,6 @@ import Task from '../models/Task';
 import Bid from '../models/Bid';
 import User from '../models/User';
 
-// Place a bid on a task
 export const placeBid = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const { taskId, amount, deliveryTime, description } = req.body;
@@ -32,7 +31,6 @@ export const placeBid = async (req: AuthenticatedRequest, res: Response) => {
     }
 };
 
-// Get all bids for a task
 export const getBidsForTask = async (req: Request, res: Response) => {
     try {
         const { taskId } = req.params;
@@ -49,7 +47,6 @@ export const getBidsForTask = async (req: Request, res: Response) => {
     }
 };
 
-// Accept a bid
 export const acceptBid = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const { bidId } = req.params;
