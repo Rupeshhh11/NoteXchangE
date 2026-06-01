@@ -6,6 +6,7 @@ import { useAuth } from './hooks/useAuth';
 // Components
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import MathBackground from './components/MathBackground';
 
 // Pages
 import Home from './pages/Home';
@@ -41,7 +42,8 @@ function App() {
 
     return (
         <Router>
-            <div className="flex flex-col min-h-screen">
+            <div className="flex flex-col min-h-screen relative">
+                <MathBackground />
                 <Navbar />
                 <main className="flex-1">
                     <Routes>
