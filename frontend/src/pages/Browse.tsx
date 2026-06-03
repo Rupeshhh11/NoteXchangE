@@ -1,25 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, Filter } from 'lucide-react';
+import { Search, SlidersHorizontal, BookOpen, ClipboardList, FolderKanban, FlaskConical, LayoutGrid, X } from 'lucide-react';
 import TaskCard from '../components/TaskCard';
 
+const CATEGORIES = [
+    { label: 'All', value: '', icon: LayoutGrid },
+    { label: 'Notes', value: 'notes writing', icon: BookOpen },
+    { label: 'Assignment', value: 'assignment', icon: ClipboardList },
+    { label: 'Project', value: 'project', icon: FolderKanban },
+    { label: 'Lab Manual', value: 'lab manual', icon: FlaskConical },
+];
+
+const SORT_OPTIONS = [
+    { label: 'Newest First', value: 'newest' },
+    { label: 'Oldest First', value: 'oldest' },
+    { label: 'Price: Low to High', value: 'price_asc' },
+    { label: 'Price: High to Low', value: 'price_desc' },
+];
+
 export default function Browse() {
-    const [tasks, setTasks] = useState([]);
+    const [tasks, setTasks] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [category, setCategory] = useState('');
-    const [status, setStatus] = useState('');
+    const [activeCategory, setActiveCategory] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [sortBy, setSortBy] = useState('newest');
+    const [showFilters, setShowFilters] = useState(false);
 
     useEffect(() => {
         fetchTasks();
-    }, [category, status]);
+    }, [activeCategory]);
 
     const fetchTasks = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('/api/tasks', {
-                params: { category, status, limit: 20 },
-            });
-            setTasks(response.data.tasks);
+            const params: any = { status: 'open', limit: 30 };
+            if (activeCategory) params.category = activeCategory;
+            const response = await axios.get('/api/tasks', { params });
+            setTasks(response.data.tasks || []);
         } catch (error) {
             console.error('Failed to fetch tasks:', error);
         } finally {
@@ -27,58 +44,127 @@ export default function Browse() {
         }
     };
 
-    return (
-        <div className="min-h-screen bg-gray-50 py-8">
-            <div className="max-w-6xl mx-auto px-4">
-                <h1 className="text-4xl font-bold mb-8">Available Tasks</h1>
+    const filteredTasks = tasks
+        .filter(t =>
+            searchQuery === '' ||
+            t.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            t.description?.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .sort((a, b) => {
+            if (sortBy === 'price_asc') return a.budget - b.budget;
+            if (sortBy === 'price_desc') return b.budget - a.budget;
+            if (sortBy === 'oldest') return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
 
-                {/* Filters */}
-                <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-                    <div className="grid md:grid-cols-3 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Category</label>
-                            <select
-                                value={category}
-                                onChange={(e) => setCategory(e.target.value)}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            >
-                                <option value="">All Categories</option>
-                                <option value="writing">Writing</option>
-                                <option value="coding">Coding</option>
-                                <option value="research">Research</option>
-                                <option value="design">Design</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Status</label>
-                            <select
-                                value={status}
-                                onChange={(e) => setStatus(e.target.value)}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            >
-                                <option value="">All Status</option>
-                                <option value="open">Open</option>
-                                <option value="in_progress">In Progress</option>
-                            </select>
-                        </div>
-                        <div className="flex items-end">
-                            <button
-                                onClick={fetchTasks}
-                                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                            >
-                                <Filter className="w-4 h-4 inline mr-2" />
-                                Apply Filters
+    return (
+        <div className="browse-page">
+            {/* ── Hero / Header ─────────────────────────── */}
+            <div className="browse-hero">
+                <div className="browse-hero-inner">
+                    <h1 className="browse-hero-title">
+                        Find Academic <span className="browse-hero-accent">Resources</span>
+                    </h1>
+                    <p className="browse-hero-sub">
+                        Browse notes, assignments, projects &amp; lab manuals from students across India
+                    </p>
+
+                    {/* Search */}
+                    <div className="browse-search-wrap">
+                        <Search className="browse-search-icon" />
+                        <input
+                            id="browse-search-input"
+                            type="text"
+                            placeholder="Search by title or description…"
+                            value={searchQuery}
+                            onChange={e => setSearchQuery(e.target.value)}
+                            className="browse-search-input"
+                        />
+                        {searchQuery && (
+                            <button className="browse-search-clear" onClick={() => setSearchQuery('')}>
+                                <X size={16} />
                             </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Filter Bar ────────────────────────────── */}
+            <div className="browse-filter-bar">
+                <div className="browse-filter-inner">
+                    {/* Category chips */}
+                    <div className="browse-chips-row">
+                        {CATEGORIES.map(cat => {
+                            const Icon = cat.icon;
+                            const isActive = activeCategory === cat.value;
+                            return (
+                                <button
+                                    key={cat.value}
+                                    id={`filter-chip-${cat.label.toLowerCase().replace(' ', '-')}`}
+                                    onClick={() => setActiveCategory(cat.value)}
+                                    className={`browse-chip ${isActive ? 'browse-chip-active' : ''}`}
+                                >
+                                    <Icon size={15} />
+                                    {cat.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Right controls */}
+                    <div className="browse-filter-right">
+                        <span className="browse-count-badge">
+                            {filteredTasks.length} {filteredTasks.length === 1 ? 'result' : 'results'}
+                        </span>
+                        <div className="browse-sort-wrap">
+                            <SlidersHorizontal size={15} className="browse-sort-icon" />
+                            <select
+                                id="browse-sort-select"
+                                value={sortBy}
+                                onChange={e => setSortBy(e.target.value)}
+                                className="browse-sort-select"
+                            >
+                                {SORT_OPTIONS.map(o => (
+                                    <option key={o.value} value={o.value}>{o.label}</option>
+                                ))}
+                            </select>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                {/* Tasks Grid */}
+            {/* ── Main Content ──────────────────────────── */}
+            <div className="browse-content">
                 {loading ? (
-                    <div className="text-center py-12">Loading tasks...</div>
+                    <div className="browse-skeleton-grid">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                            <div key={i} className="browse-skeleton-card">
+                                <div className="skel-line skel-short" />
+                                <div className="skel-line skel-long" />
+                                <div className="skel-line skel-mid" />
+                                <div className="skel-line skel-short" />
+                                <div className="skel-footer">
+                                    <div className="skel-btn" />
+                                    <div className="skel-btn skel-btn-wide" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : filteredTasks.length === 0 ? (
+                    <div className="browse-empty">
+                        <div className="browse-empty-icon">🎓</div>
+                        <h3>No results found</h3>
+                        <p>Try changing the filter or search query</p>
+                        <button
+                            className="btn btn-primary"
+                            onClick={() => { setSearchQuery(''); setActiveCategory(''); }}
+                        >
+                            Clear filters
+                        </button>
+                    </div>
                 ) : (
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {tasks.map((task: any) => (
+                    <div className="browse-grid">
+                        {filteredTasks.map((task: any) => (
                             <TaskCard key={task.id} task={task} />
                         ))}
                     </div>
