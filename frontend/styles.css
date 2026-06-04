@@ -1275,10 +1275,10 @@ body {
 
 /* Card title */
 .tc-title {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     font-weight: 700;
     color: #111827 !important;
-    margin: 0 0 0.5rem 0 !important;
+    margin: 0.5rem 0 0.7rem 0 !important;
     line-height: 1.35;
     font-family: 'Space Grotesk', 'Inter', sans-serif;
     text-align: left;
