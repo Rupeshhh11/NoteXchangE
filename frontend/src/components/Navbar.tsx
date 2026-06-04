@@ -2,10 +2,12 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X, LogOut, User } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { useAuthModal } from '../context/AuthModalContext';
 
 export default function Navbar() {
     const navigate = useNavigate();
     const { isAuthenticated, user, logout } = useAuth();
+    const { openAuth } = useAuthModal();
     const [isOpen, setIsOpen] = React.useState(false);
 
     const handleLogout = async () => {
@@ -60,18 +62,12 @@ export default function Navbar() {
                         </>
                     ) : (
                         <>
-                            <Link
-                                to="/login"
-                                className="btn btn-secondary"
-                            >
+                            <button type="button" className="btn btn-secondary" onClick={() => openAuth('login')}>
                                 Log In
-                            </Link>
-                            <Link
-                                to="/register"
-                                className="btn btn-primary"
-                            >
+                            </button>
+                            <button type="button" className="btn btn-primary" onClick={() => openAuth('signup')}>
                                 Sign Up
-                            </Link>
+                            </button>
                         </>
                     )}
                     
@@ -131,12 +127,12 @@ export default function Navbar() {
                         </>
                     ) : (
                         <>
-                            <Link to="/login" className="block hover:text-primary transition font-medium" onClick={() => setIsOpen(false)}>
+                            <button type="button" className="block w-full text-left hover:text-primary transition font-medium" onClick={() => { openAuth('login'); setIsOpen(false); }}>
                                 Log In
-                            </Link>
-                            <Link to="/register" className="block hover:text-primary transition font-medium" onClick={() => setIsOpen(false)}>
+                            </button>
+                            <button type="button" className="block w-full text-left hover:text-primary transition font-medium" onClick={() => { openAuth('signup'); setIsOpen(false); }}>
                                 Sign Up
-                            </Link>
+                            </button>
                         </>
                     )}
                 </div>
