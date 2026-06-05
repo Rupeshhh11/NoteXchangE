@@ -16,7 +16,6 @@
         "clsx": "*",
         "date-fns": "*",
         "framer-motion": "*",
-        "gsap": "^3.15.0",
         "lucide-react": "*",
         "react": "*",
         "react-dom": "*",
