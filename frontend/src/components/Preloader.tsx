@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-import gsap from 'gsap';
 
 interface PreloaderProps {
     onComplete: () => void;
@@ -25,49 +24,71 @@ export default function Preloader({ onComplete }: PreloaderProps) {
         const bg = backgroundRef.current;
         const content = contentRef.current;
         if (!overlay || !note || !x || !change || !bar || !bg || !content) return;
+        // Simple fallback animation using timeouts & CSS transitions so preloader still shows.
+        overlay.style.opacity = '1';
+        [note, x, change].forEach((el) => {
+            el.style.transform = 'translateY(40px) scale(0.85)';
+            el.style.opacity = '0';
+            el.style.transition = 'transform 450ms cubic-bezier(.175,.885,.32,1), opacity 450ms ease';
+        });
+        if (bar) {
+            bar.style.transformOrigin = 'left center';
+            bar.style.transform = 'scaleX(0)';
+            bar.style.transition = 'transform 1000ms ease-in-out';
+        }
+        if (tagline) {
+            tagline.style.opacity = '0';
+            tagline.style.transform = 'translateY(10px)';
+            tagline.style.transition = 'transform 400ms ease, opacity 400ms ease';
+        }
 
-        // Reset positions & opacity
-        gsap.set(overlay, { opacity: 1 });
-        gsap.set([note, x, change], { y: 40, opacity: 0, scale: 0.85 });
-        gsap.set(bar, { scaleX: 0, transformOrigin: 'left center' });
-        gsap.set(tagline, { opacity: 0, y: 10 });
-        
-        // Gentle float for background symbols
-        const syms = bg.querySelectorAll('.preloader-math-sym, .preloader-bg-shape');
-        gsap.set(syms, { opacity: 0, scale: 0.7 });
-
-        const tl = gsap.timeline({
-            onComplete: () => {
-                // Exit animation
-                gsap.to(overlay, {
-                    opacity: 0,
-                    y: -15,
-                    duration: 0.5,
-                    ease: 'power3.inOut',
-                    onComplete: onComplete,
-                });
-            },
+        const syms = Array.from(bg.querySelectorAll('.preloader-math-sym, .preloader-bg-shape')) as HTMLElement[];
+        syms.forEach((s) => {
+            s.style.opacity = '0';
+            s.style.transform = 'scale(0.7)';
+            s.style.transition = 'opacity 800ms ease, transform 800ms ease';
         });
 
-        // Timeline Sequence
-        tl.to(syms, {
-            opacity: (i, target) => target.classList.contains('preloader-math-sym') ? 0.18 : 0.08,
-            scale: 1,
-            duration: 0.8,
-            stagger: 0.05,
-            ease: 'power2.out'
-        })
-        .to(note, { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.8)' }, 0.2)
-        .to(x, { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.8)' }, 0.3)
-        .to(change, { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.8)' }, 0.4)
-        .to(tagline, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }, 0.6)
-        .to(bar, { scaleX: 1, duration: 1.0, ease: 'power2.inOut' }, 0.7)
-        .to({}, { duration: 0.4 }); // Hold frame before complete
+        const timers: number[] = [];
+        timers.push(window.setTimeout(() => {
+            syms.forEach((s, i) => {
+                s.style.opacity = s.classList.contains('preloader-math-sym') ? '0.18' : '0.08';
+                s.style.transform = 'scale(1)';
+                if (i === 0 && note) {
+                    note.style.transform = 'translateY(0) scale(1)';
+                    note.style.opacity = '1';
+                }
+            });
+        }, 100));
 
-        // Cleanup
-        return () => {
-            tl.kill();
-        };
+        timers.push(window.setTimeout(() => {
+            if (x) { x.style.transform = 'translateY(0) scale(1)'; x.style.opacity = '1'; }
+        }, 200));
+
+        timers.push(window.setTimeout(() => {
+            if (change) { change.style.transform = 'translateY(0) scale(1)'; change.style.opacity = '1'; }
+        }, 300));
+
+        timers.push(window.setTimeout(() => {
+            if (tagline) { tagline.style.transform = 'translateY(0)'; tagline.style.opacity = '1'; }
+        }, 500));
+
+        timers.push(window.setTimeout(() => {
+            if (bar) bar.style.transform = 'scaleX(1)';
+        }, 700));
+
+        // Complete after sequence
+        timers.push(window.setTimeout(() => {
+            if (overlay) {
+                overlay.style.transition = 'opacity 500ms ease, transform 500ms ease';
+                overlay.style.opacity = '0';
+                overlay.style.transform = 'translateY(-15px)';
+            }
+            // call onComplete after fade
+            window.setTimeout(() => onComplete(), 520);
+        }, 1900));
+
+        return () => timers.forEach((t) => clearTimeout(t));
     }, [onComplete]);
 
     return (
