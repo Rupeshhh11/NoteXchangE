@@ -91,6 +91,9 @@ export default function TaskCard({ task }: TaskCardProps) {
                 <span className="tc-time">{timeAgo(task.createdAt)}</span>
             </div>
 
+            {/* Push footer to bottom */}
+            <div className="tc-spacer" />
+
             {/* Divider */}
             <hr className="tc-hr" />
 
@@ -100,7 +103,7 @@ export default function TaskCard({ task }: TaskCardProps) {
                     View Details
                 </Link>
                 <Link to={`/tasks/${task.id}`} className="tc-acquire-btn">
-                    Acquire It
+                    Acquire It ✦
                 </Link>
             </div>
         </div>
