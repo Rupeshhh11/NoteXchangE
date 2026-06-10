@@ -13,6 +13,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import TaskDetail from './pages/TaskDetail';
+import RequestDetail from './pages/RequestDetail';
 import Browse from './pages/Browse';
 import PlaceBid from './pages/PlaceBid';
 import Messages from './pages/Messages';
@@ -85,6 +86,7 @@ function AppShell() {
                             </ProtectedRoute>
                         }
                     />
+                    <Route path="/requests/:id" element={<RequestDetail />} />
                     <Route
                         path="/bid/:taskId"
                         element={
