@@ -6,11 +6,11 @@ import RequestCard, { type RequestItem } from '../components/RequestCard';
 import toast from 'react-hot-toast';
 
 const mockRequests: RequestItem[] = [
-    { id: 1, category: 'Notes Writing', title: 'Advanced Calculus', pages: 15, ratePerPage: 5, budget: 75, status: 'Rate Fixed', postedBy: 'Alex009 • Mango', canDelete: false },
-    { id: 2, category: 'Assignment', title: 'History Essay', pages: 4, ratePerPage: 10, budget: 40, status: 'Rate Fixed', postedBy: 'Sonali013 • Sakchi', canDelete: false },
-    { id: 3, category: 'Lab Manual', title: 'Physics Lab 101', pages: 'N/A', budget: 30, status: 'Acquire', postedBy: 'Aman999 • Mango', canDelete: false },
-    { id: 4, category: 'Project', title: 'Web Dev Portfolio', pages: 'N/A', budget: 150, status: 'Rate Fixed', postedBy: 'Rohit69 • Dimna', canDelete: false },
-    { id: 5, category: 'Notes Writing', title: 'Organic Chemistry', pages: 10, ratePerPage: 6, budget: 60, status: 'Acquire', postedBy: 'Neha_22 • Sakchi', canDelete: false },
+    { id: 1, category: 'Notes Writing', title: 'Advanced Calculus', pages: 15, ratePerPage: 5, budget: 75, postedBy: 'Alex009 • Mango', canDelete: false },
+    { id: 2, category: 'Assignment', title: 'History Essay', pages: 4, ratePerPage: 10, budget: 40, postedBy: 'Sonali013 • Sakchi', canDelete: false },
+    { id: 3, category: 'Lab Manual', title: 'Physics Lab 101', pages: 'N/A', budget: 30, postedBy: 'Aman999 • Mango', canDelete: false },
+    { id: 4, category: 'Project', title: 'Web Dev Portfolio', pages: 'N/A', budget: 150, postedBy: 'Rohit69 • Dimna', canDelete: false },
+    { id: 5, category: 'Notes Writing', title: 'Organic Chemistry', pages: 10, ratePerPage: 6, budget: 60, postedBy: 'Neha_22 • Sakchi', canDelete: false },
 ];
 
 export default function Home() {
