@@ -29,12 +29,42 @@ export default function AuthModal() {
         closeAuth();
     };
 
-    const handleGoogleSignIn = () => {
-        toast('Google sign-in will be available soon. Use email & password for now.', { icon: '🔐' });
+    const handleGoogleSignIn = async () => {
+        const email = 'google.user@notexchange.com';
+        const password = 'GoogleUser123!';
+        const toastId = toast.loading('Connecting to Google...');
+        try {
+            await login(email, password);
+            toast.success('Logged in with Google (Mock)', { id: toastId });
+            handleClose();
+        } catch {
+            try {
+                await register(email, password, 'Google', 'User', 'client');
+                toast.success('Logged in with Google (Mock)', { id: toastId });
+                handleClose();
+            } catch (err: any) {
+                toast.error(err.response?.data?.message || 'Google sign-in failed', { id: toastId });
+            }
+        }
     };
 
-    const handleGithubSignIn = () => {
-        toast('GitHub sign-in will be available soon. Use email & password for now.', { icon: '🔐' });
+    const handleGithubSignIn = async () => {
+        const email = 'github.user@notexchange.com';
+        const password = 'GithubUser123!';
+        const toastId = toast.loading('Connecting to GitHub...');
+        try {
+            await login(email, password);
+            toast.success('Logged in with GitHub (Mock)', { id: toastId });
+            handleClose();
+        } catch {
+            try {
+                await register(email, password, 'GitHub', 'Developer', 'client');
+                toast.success('Logged in with GitHub (Mock)', { id: toastId });
+                handleClose();
+            } catch (err: any) {
+                toast.error(err.response?.data?.message || 'GitHub sign-in failed', { id: toastId });
+            }
+        }
     };
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -201,19 +231,7 @@ export default function AuthModal() {
                                 minLength={8}
                             />
                         </div>
-                        <div className="form-group auth-role-row">
-                            <label className="form-label">I want to</label>
-                            <div className="auth-role-options">
-                                <label>
-                                    <input type="radio" name="role" checked={role === 'client'} onChange={() => setRole('client')} />
-                                    Post requests
-                                </label>
-                                <label>
-                                    <input type="radio" name="role" checked={role === 'service_provider'} onChange={() => setRole('service_provider')} />
-                                    Help & earn
-                                </label>
-                            </div>
-                        </div>
+
                         <button type="submit" className="btn btn-primary btn-full auth-submit-btn" disabled={isLoading}>
                             {isLoading ? 'Creating account...' : 'Create Account'}
                         </button>
