@@ -13,6 +13,10 @@ export const placeBid = async (req: AuthenticatedRequest, res: Response) => {
             return res.status(404).json({ message: 'Task not found' });
         }
 
+        if (task.clientId === req.userId) {
+            return res.status(400).json({ message: 'You cannot request or bid on your own task' });
+        }
+
         const bid = await Bid.create({
             taskId,
             serviceProviderId: req.userId,
@@ -86,6 +90,11 @@ export const rejectBid = async (req: AuthenticatedRequest, res: Response) => {
         const bid = await Bid.findByPk(bidId);
         if (!bid) {
             return res.status(404).json({ message: 'Bid not found' });
+        }
+
+        const task = await Task.findByPk(bid.taskId);
+        if (!task || task.clientId !== req.userId) {
+            return res.status(403).json({ message: 'Unauthorized. Only the task owner can reject requests.' });
         }
 
         bid.status = 'rejected';

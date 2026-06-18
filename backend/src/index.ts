@@ -9,6 +9,7 @@ import path from 'path';
 
 dotenv.config();
 
+import './models/associations';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import taskRoutes from './routes/taskRoutes';
