@@ -2,7 +2,10 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import api from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import { useAuthModal } from '../context/AuthModalContext';
+import { useVerificationModal } from '../context/VerificationModalContext';
 import RequestCard, { type RequestItem } from '../components/RequestCard';
+import AcquireModal from '../components/AcquireModal';
+import TaskDetailsModal from '../components/TaskDetailsModal';
 import toast from 'react-hot-toast';
 
 const mockRequests: RequestItem[] = [
@@ -14,8 +17,9 @@ const mockRequests: RequestItem[] = [
 ];
 
 export default function Home() {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
     const { openAuth } = useAuthModal();
+    const { openVerification } = useVerificationModal();
     const [requests, setRequests] = useState<RequestItem[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [showPostModal, setShowPostModal] = useState(false);
@@ -24,6 +28,11 @@ export default function Home() {
     const [formPages, setFormPages] = useState('');
     const [formBudget, setFormBudget] = useState('');
     const [formDetails, setFormDetails] = useState('');
+
+    const [acquireModalOpen, setAcquireModalOpen] = useState(false);
+    const [acquireRequest, setAcquireRequest] = useState<RequestItem | null>(null);
+    const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+    const [detailsTask, setDetailsTask] = useState<any | null>(null);
 
     // Advanced filters
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -70,7 +79,6 @@ export default function Home() {
         fetchTasks();
     }, []);
 
-    // Removed GSAP animations — keep UI behavior intact without animation library
     useEffect(() => {
         if (showPostModal) document.body.style.overflow = 'hidden';
         else document.body.style.overflow = '';
@@ -156,15 +164,6 @@ export default function Home() {
         closePostModal();
         toast.success(`Request posted — ₹${Math.floor(totalBudget)} total`);
         fetchTasks();
-
-        // Optionally highlight new card briefly
-        setTimeout(() => {
-            const el = document.getElementById(`card-${newEntry.id}`);
-            if (el) {
-                el.classList.add('new-card-highlight');
-                setTimeout(() => el.classList.remove('new-card-highlight'), 900);
-            }
-        }, 400);
     };
 
     const handleDeleteRequest = (id: string | number) => {
@@ -188,11 +187,13 @@ export default function Home() {
             openAuth('login');
             return;
         }
-        if (req.isRealTask) {
-            window.location.href = `/tasks/${req.id}`;
+        if (user?.verificationStatus !== 'Verified') {
+            toast('Please complete identity verification to acquire tasks', { icon: '🔒' });
+            openVerification();
             return;
         }
-        toast.success(`Acquire started for "${req.title}"`);
+        setAcquireRequest(req);
+        setAcquireModalOpen(true);
     };
 
     const toggleCategory = (cat: string) => {
@@ -217,8 +218,13 @@ export default function Home() {
                     <p className="hero-description">
                         An academic collaboration platform designed to connect students who need academic work with those who can deliver it and earn.
                     </p>
-                    <div className="back10">
+                    <div className="desktop-video-bg">
                         <video src="/0_3d_Model_Dragon_3840x2160.mp4" muted autoPlay loop playsInline />
+                    </div>
+                    <div className="liquid-glass-bg mobile-only-bg">
+                        <div className="liquid-blob blob-1"></div>
+                        <div className="liquid-blob blob-2"></div>
+                        <div className="liquid-blob blob-3"></div>
                     </div>
                     <div className="hero-actions">
                         <button
@@ -227,6 +233,11 @@ export default function Home() {
                                 if (!isAuthenticated) {
                                     toast('Sign in to post a request', { icon: '📝' });
                                     openAuth('login');
+                                    return;
+                                }
+                                if (user?.verificationStatus !== 'Verified') {
+                                    toast('Please complete identity verification to post requests', { icon: '🔒' });
+                                    openVerification();
                                     return;
                                 }
                                 setShowPostModal(true);
@@ -375,6 +386,10 @@ export default function Home() {
                                 req={req}
                                 onDelete={req.canDelete ? handleDeleteRequest : undefined}
                                 onAcquire={handleAcquire}
+                                onViewDetails={(item) => {
+                                    setDetailsTask(item);
+                                    setDetailsModalOpen(true);
+                                }}
                             />
                         ))
                     )}
@@ -449,6 +464,89 @@ export default function Home() {
                     </div>
                 </div>
             )}
+
+            <section id="about" style={{ padding: '6rem 2rem', background: 'var(--clr-about-bg, #e8f5e9)', display: 'flex', justifyContent: 'center', color: 'var(--clr-foreground, #111827)' }}>
+                <div style={{ maxWidth: '1200px', width: '100%', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem', alignItems: 'start' }}>
+                    {/* Left Side */}
+                    <div>
+                        <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1.5rem', color: 'var(--clr-foreground, #000)' }}>About NoteXchangE</h2>
+                        <p style={{ fontSize: '1.1rem', fontWeight: 500, color: 'var(--clr-muted-foreground, #1f2937)', marginBottom: '1rem', lineHeight: 1.6 }}>
+                            Your Time is Precious. Let Us Handle the Work. Let's be real  student life is a wild rollercoaster ride. One week you're in total Holiday Mode, chilling with friends, traveling, or upskilling. The next week, Exam Season hits like a truck, and suddenly you are buried under a mountain of pending assignments, unwritten lab manuals, and incomplete projects.
+                        </p>
+                        <p style={{ fontSize: '1.1rem', fontWeight: 500, color: 'var(--clr-muted-foreground, #1f2937)', lineHeight: 1.6 }}>
+                            That's exactly why we built NoteXchangE a peer-to-peer platform created by students, for students, to help you balance your chill time, clear your academic backlog, and make some serious cash on the side!
+                        </p>
+                    </div>
+
+                    {/* Right Side */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                        <div>
+                            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--clr-foreground, #000)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <span>🌴</span> Holiday Mode:
+                            </h3>
+                            <p style={{ fontSize: '1rem', color: 'var(--clr-muted-foreground, #1f2937)', fontWeight: 500, lineHeight: 1.6, marginLeft: '1.75rem' }}>
+                                Holidays are meant for relaxing, not spending hours filling practical files. With NoteXchangE, you can get your writing work done by fellow students while enjoying your break stress free. And if you have some free time, complete assignments, notes, or lab reports for others and turn your holidays into an easy way to earn extra pocket money.
+                            </p>
+                        </div>
+                        <div>
+                            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--clr-foreground, #000)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <span>📚</span> Exam Mode:
+                            </h3>
+                            <p style={{ fontSize: '1rem', color: 'var(--clr-muted-foreground, #1f2937)', fontWeight: 500, lineHeight: 1.6, marginLeft: '1.75rem' }}>
+                                When exams are near, every minute matters. Instead of wasting time searching for notes or rushing to finish projects, focus on your preparation while NoteXchangE connects you with fellow students who can help complete pending academic tasks. And if you're looking to earn, take on requests from other students, complete their notes, assignments, or project work, and get paid for your effort. It's a simple, transparent way for students to help each other succeed while reducing stress and earning extra pocket money.
+
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="how-it-works" style={{ padding: '6rem 2rem', background: 'var(--clr-how-it-works-bg, #f8fafc)', textAlign: 'center', color: 'var(--clr-foreground, inherit)', transition: 'background-color 0.3s ease' }}>
+                <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                    <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1.5rem', color: 'var(--clr-foreground, #1f2937)' }}>How it Works</h2>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem', marginTop: '3rem' }}>
+                        <div style={{ padding: '2rem', background: 'var(--clr-card-bg, white)', borderRadius: '16px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', border: '1px solid var(--clr-border, transparent)' }}>
+                            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📝</div>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>1. Post a Request</h3>
+                            <p style={{ color: 'var(--clr-muted-foreground, #6b7280)' }}>Describe what you need help with and set a budget.</p>
+                        </div>
+                        <div style={{ padding: '2rem', background: 'var(--clr-card-bg, white)', borderRadius: '16px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', border: '1px solid var(--clr-border, transparent)' }}>
+                            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🤝</div>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>2. Connect</h3>
+                            <p style={{ color: 'var(--clr-muted-foreground, #6b7280)' }}>Others browse and acquire your request to help out.</p>
+                        </div>
+                        <div style={{ padding: '2rem', background: 'var(--clr-card-bg, white)', borderRadius: '16px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', border: '1px solid var(--clr-border, transparent)' }}>
+                            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>✨</div>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>3. Complete</h3>
+                            <p style={{ color: 'var(--clr-muted-foreground, #6b7280)' }}>Receive your work, review, and mark it as complete.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="community" style={{ padding: '6rem 2rem', background: 'var(--clr-community-bg, linear-gradient(135deg, #fff7ed, #ffedd5))', textAlign: 'center', color: 'var(--clr-foreground, inherit)', transition: 'background-color 0.3s ease' }}>
+                <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                    <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1.5rem', color: '#ea580c' }}>Join Our Community</h2>
+                    <p style={{ fontSize: '1.125rem', color: 'var(--clr-muted-foreground, #4b5563)', lineHeight: 1.8, marginBottom: '2rem' }}>
+                        Be part of a growing network of students. Share knowledge, earn by helping others, and excel in your academics together!
+                    </p>
+                    <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ padding: '1rem 2.5rem', borderRadius: '9999px', background: '#ea580c', color: 'white', fontWeight: 'bold', border: 'none', cursor: 'pointer', boxShadow: '0 10px 15px -3px rgba(234, 88, 12, 0.3)', transition: 'transform 0.2s' }}>
+                        Get Started
+                    </button>
+                </div>
+            </section>
+
+            <AcquireModal
+                isOpen={acquireModalOpen}
+                onClose={() => setAcquireModalOpen(false)}
+                request={acquireRequest}
+            />
+            <TaskDetailsModal
+                isOpen={detailsModalOpen}
+                onClose={() => setDetailsModalOpen(false)}
+                task={detailsTask}
+                onAcquire={handleAcquire}
+            />
         </>
     );
 }
