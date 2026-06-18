@@ -6,6 +6,7 @@ export interface User {
     phoneNumber?: string;
     role: 'client' | 'service_provider' | 'admin';
     isEmailVerified: boolean;
+    isPhoneVerified?: boolean;
     isIdentityVerified: boolean;
     profileImage?: string;
     bio?: string;
@@ -13,6 +14,13 @@ export interface User {
     ratingCount: number;
     totalEarnings: number;
     totalSpent: number;
+    // Verification fields
+    googleProfilePhoto?: string;
+    otpVerified?: boolean;
+    aadhaarImage?: string;
+    userPhoto?: string;
+    profilePicturePreference?: 'selected' | 'google' | 'default';
+    verificationStatus?: 'Pending' | 'Approved' | 'Verified';
 }
 
 export interface Task {

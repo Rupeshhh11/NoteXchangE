@@ -33,8 +33,8 @@ export const getMessages = async (req: AuthenticatedRequest, res: Response) => {
 
         const { count, rows } = await Message.findAndCountAll({
             where: {
-                senderId: [req.userId, recipientId],
-                recipientId: [req.userId, recipientId],
+                senderId: [req.userId, recipientId].filter(Boolean) as string[],
+                recipientId: [req.userId, recipientId].filter(Boolean) as string[],
             },
             include: [
                 { model: User, as: 'sender', attributes: ['id', 'firstName', 'lastName', 'profileImage'] },
