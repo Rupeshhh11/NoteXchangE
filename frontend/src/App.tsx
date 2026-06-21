@@ -3,11 +3,13 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavig
 import { Toaster } from 'react-hot-toast';
 import { useAuth } from './hooks/useAuth';
 import { AuthModalProvider, useAuthModal } from './context/AuthModalContext';
+import { VerificationModalProvider } from './context/VerificationModalContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import MathBackground from './components/MathBackground';
+
 import Preloader from './components/Preloader';
 import AuthModal from './components/AuthModal';
+import VerificationModal from './components/VerificationModal';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -61,7 +63,7 @@ function AppShell() {
     return (
         <>
             {showPreloader && <Preloader onComplete={() => setShowPreloader(false)} />}
-            <MathBackground />
+
             <Navbar />
             <AuthRouteHandler />
             <main className="flex-1">
@@ -120,6 +122,7 @@ function AppShell() {
             </main>
             <Footer />
             <AuthModal />
+            <VerificationModal />
             <Toaster position="bottom-right" />
         </>
     );
@@ -129,9 +132,11 @@ function App() {
     return (
         <Router>
             <AuthModalProvider>
-                <div className="flex flex-col min-h-screen relative app-root">
-                    <AppShell />
-                </div>
+                <VerificationModalProvider>
+                    <div className="flex flex-col min-h-screen relative app-root">
+                        <AppShell />
+                    </div>
+                </VerificationModalProvider>
             </AuthModalProvider>
         </Router>
     );
