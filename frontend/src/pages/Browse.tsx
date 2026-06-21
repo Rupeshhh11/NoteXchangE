@@ -2,6 +2,12 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Search, SlidersHorizontal, BookOpen, ClipboardList, FolderKanban, FlaskConical, LayoutGrid, X } from 'lucide-react';
 import TaskCard from '../components/TaskCard';
+import AcquireModal from '../components/AcquireModal';
+import TaskDetailsModal from '../components/TaskDetailsModal';
+import { useAuth } from '../hooks/useAuth';
+import { useAuthModal } from '../context/AuthModalContext';
+import { useVerificationModal } from '../context/VerificationModalContext';
+import toast from 'react-hot-toast';
 
 const CATEGORIES = [
     { label: 'All', value: '', icon: LayoutGrid },
@@ -19,12 +25,46 @@ const SORT_OPTIONS = [
 ];
 
 export default function Browse() {
+    const { isAuthenticated, user } = useAuth();
+    const { openAuth } = useAuthModal();
+    const { openVerification } = useVerificationModal();
     const [tasks, setTasks] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState('newest');
     const [showFilters, setShowFilters] = useState(false);
+    
+    const [acquireModalOpen, setAcquireModalOpen] = useState(false);
+    const [acquireRequest, setAcquireRequest] = useState<any | null>(null);
+    const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+    const [detailsTask, setDetailsTask] = useState<any | null>(null);
+
+    const handleAcquire = (task: any) => {
+        if (!isAuthenticated) {
+            toast('Sign in to acquire requests', { icon: '🔒' });
+            openAuth('login');
+            return;
+        }
+        if (user?.verificationStatus !== 'Verified') {
+            toast('Please complete identity verification first.', { icon: '🛡️' });
+            openVerification();
+            return;
+        }
+        if (task.clientId === user?.id) {
+            toast.error('You cannot acquire your own task');
+            return;
+        }
+        const mappedReq = {
+            id: task.id,
+            title: task.title,
+            category: task.category,
+            budget: task.budget,
+            postedBy: task.posterName || `User#${task.clientId?.slice(-4) || '????'}`
+        };
+        setAcquireRequest(mappedReq);
+        setAcquireModalOpen(true);
+    };
 
     useEffect(() => {
         fetchTasks();
@@ -165,11 +205,32 @@ export default function Browse() {
                 ) : (
                     <div className="browse-grid">
                         {filteredTasks.map((task: any) => (
-                            <TaskCard key={task.id} task={task} />
+                            <TaskCard 
+                                key={task.id} 
+                                task={task} 
+                                onViewDetails={(t) => {
+                                    setDetailsTask(t);
+                                    setDetailsModalOpen(true);
+                                }}
+                                onAcquire={handleAcquire}
+                            />
                         ))}
                     </div>
                 )}
             </div>
+            
+            <AcquireModal 
+                isOpen={acquireModalOpen} 
+                onClose={() => setAcquireModalOpen(false)} 
+                request={acquireRequest} 
+            />
+            <TaskDetailsModal
+                isOpen={detailsModalOpen}
+                onClose={() => setDetailsModalOpen(false)}
+                task={detailsTask}
+                onAcquire={handleAcquire}
+                currentUserId={user?.id}
+            />
         </div>
     );
 }
