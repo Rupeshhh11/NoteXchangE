@@ -23,6 +23,12 @@ interface UserAttributes {
     lastLogin: Date | null;
     createdAt: Date;
     updatedAt: Date;
+    googleProfilePhoto: string | null;
+    otpVerified: boolean;
+    aadhaarImage: string | null;
+    userPhoto: string | null;
+    profilePicturePreference: 'selected' | 'google' | 'default';
+    verificationStatus: 'Pending' | 'Approved' | 'Verified';
 }
 
 interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'createdAt' | 'updatedAt'> { }
@@ -48,6 +54,12 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
     public lastLogin!: Date | null;
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
+    public googleProfilePhoto!: string | null;
+    public otpVerified!: boolean;
+    public aadhaarImage!: string | null;
+    public userPhoto!: string | null;
+    public profilePicturePreference!: 'selected' | 'google' | 'default';
+    public verificationStatus!: 'Pending' | 'Approved' | 'Verified';
 
     public async validatePassword(password: string): Promise<boolean> {
         return bcrypt.compare(password, this.password);
@@ -102,6 +114,30 @@ User.init(
         profileImage: {
             type: DataTypes.STRING,
             allowNull: true,
+        },
+        googleProfilePhoto: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        otpVerified: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+        },
+        aadhaarImage: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        userPhoto: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        profilePicturePreference: {
+            type: DataTypes.ENUM('selected', 'google', 'default'),
+            defaultValue: 'default',
+        },
+        verificationStatus: {
+            type: DataTypes.ENUM('Pending', 'Approved', 'Verified'),
+            defaultValue: 'Pending',
         },
         bio: {
             type: DataTypes.TEXT,
