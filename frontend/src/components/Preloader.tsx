@@ -1,142 +1,172 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 
 interface PreloaderProps {
     onComplete: () => void;
 }
 
 export default function Preloader({ onComplete }: PreloaderProps) {
-    const overlayRef = useRef<HTMLDivElement>(null);
-    const noteRef = useRef<HTMLSpanElement>(null);
-    const xRef = useRef<HTMLSpanElement>(null);
-    const changeRef = useRef<HTMLSpanElement>(null);
-    const taglineRef = useRef<HTMLParagraphElement>(null);
-    const barRef = useRef<HTMLDivElement>(null);
-    const backgroundRef = useRef<HTMLDivElement>(null);
-    const contentRef = useRef<HTMLDivElement>(null);
-
     useEffect(() => {
-        const overlay = overlayRef.current;
-        const note = noteRef.current;
-        const x = xRef.current;
-        const change = changeRef.current;
-        const tagline = taglineRef.current;
-        const bar = barRef.current;
-        const bg = backgroundRef.current;
-        const content = contentRef.current;
-        if (!overlay || !note || !x || !change || !bar || !bg || !content) return;
-        // Simple fallback animation using timeouts & CSS transitions so preloader still shows.
-        overlay.style.opacity = '1';
-        [note, x, change].forEach((el) => {
-            el.style.transform = 'translateY(40px) scale(0.85)';
-            el.style.opacity = '0';
-            el.style.transition = 'transform 450ms cubic-bezier(.175,.885,.32,1), opacity 450ms ease';
-        });
-        if (bar) {
-            bar.style.transformOrigin = 'left center';
-            bar.style.transform = 'scaleX(0)';
-            bar.style.transition = 'transform 1000ms ease-in-out';
-        }
-        if (tagline) {
-            tagline.style.opacity = '0';
-            tagline.style.transform = 'translateY(10px)';
-            tagline.style.transition = 'transform 400ms ease, opacity 400ms ease';
-        }
-
-        const syms = Array.from(bg.querySelectorAll('.preloader-math-sym, .preloader-bg-shape')) as HTMLElement[];
-        syms.forEach((s) => {
-            s.style.opacity = '0';
-            s.style.transform = 'scale(0.7)';
-            s.style.transition = 'opacity 800ms ease, transform 800ms ease';
-        });
-
-        const timers: number[] = [];
-        timers.push(window.setTimeout(() => {
-            syms.forEach((s, i) => {
-                s.style.opacity = s.classList.contains('preloader-math-sym') ? '0.18' : '0.08';
-                s.style.transform = 'scale(1)';
-                if (i === 0 && note) {
-                    note.style.transform = 'translateY(0) scale(1)';
-                    note.style.opacity = '1';
-                }
-            });
-        }, 100));
-
-        timers.push(window.setTimeout(() => {
-            if (x) { x.style.transform = 'translateY(0) scale(1)'; x.style.opacity = '1'; }
-        }, 200));
-
-        timers.push(window.setTimeout(() => {
-            if (change) { change.style.transform = 'translateY(0) scale(1)'; change.style.opacity = '1'; }
-        }, 300));
-
-        timers.push(window.setTimeout(() => {
-            if (tagline) { tagline.style.transform = 'translateY(0)'; tagline.style.opacity = '1'; }
-        }, 500));
-
-        timers.push(window.setTimeout(() => {
-            if (bar) bar.style.transform = 'scaleX(1)';
-        }, 700));
-
-        // Complete after sequence
-        timers.push(window.setTimeout(() => {
-            if (overlay) {
-                overlay.style.transition = 'opacity 500ms ease, transform 500ms ease';
-                overlay.style.opacity = '0';
-                overlay.style.transform = 'translateY(-15px)';
-            }
-            // call onComplete after fade
-            window.setTimeout(() => onComplete(), 520);
-        }, 1900));
-
-        return () => timers.forEach((t) => clearTimeout(t));
+        const timer = setTimeout(() => {
+            onComplete();
+        }, 2500);
+        return () => clearTimeout(timer);
     }, [onComplete]);
 
     return (
-        <div ref={overlayRef} className="app-preloader" aria-label="Loading NoteXchangE">
-            {/* GPU Accelerated Floating Math & Scientific Background */}
-            <div ref={backgroundRef} className="preloader-scientific-bg">
-                {/* Mathematical formulas & symbols */}
-                <div className="preloader-math-sym sym-1">∫ e^x dx = e^x + C</div>
-                <div className="preloader-math-sym sym-2">E = mc²</div>
-                <div className="preloader-math-sym sym-3">{"∑_{i=1}^n x_i"}</div>
-                <div className="preloader-math-sym sym-4">{"∇ × B = μ₀J"}</div>
-                <div className="preloader-math-sym sym-5">π ≈ 3.14159</div>
-                <div className="preloader-math-sym sym-6">f(x) = sin(x)</div>
-                <div className="preloader-math-sym sym-7">λ = h / p</div>
-                <div className="preloader-math-sym sym-8">Δy / Δx</div>
-                <div className="preloader-math-sym sym-9">θ + ϕ = 90°</div>
+        <div
+            style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: 9999,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'radial-gradient(ellipse at center, #1a0a00 0%, #0f0a05 60%, #000 100%)',
+                animation: 'preloader-fade-in 0.3s ease',
+            }}
+            aria-label="Loading NoteXchangE"
+        >
+            <style>{`
+                @keyframes preloader-fade-in {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes ring-spin-1 {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+                @keyframes ring-spin-2 {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(-360deg); }
+                }
+                @keyframes logo-appear {
+                    0% { opacity: 0; transform: scale(0.6); }
+                    60% { opacity: 1; transform: scale(1.08); }
+                    100% { opacity: 1; transform: scale(1); }
+                }
+                @keyframes text-appear {
+                    0% { opacity: 0; transform: translateY(12px); }
+                    100% { opacity: 1; transform: translateY(0); }
+                }
+                @keyframes bar-fill {
+                    0% { width: 0%; }
+                    20% { width: 20%; }
+                    50% { width: 60%; }
+                    80% { width: 85%; }
+                    100% { width: 100%; }
+                }
+                @keyframes glow-pulse {
+                    0%, 100% { opacity: 0.35; transform: scale(1); }
+                    50% { opacity: 0.6; transform: scale(1.2); }
+                }
+                @keyframes preloader-exit {
+                    0% { opacity: 1; transform: scale(1); }
+                    100% { opacity: 0; transform: scale(1.05); }
+                }
+            `}</style>
 
-                {/* Elegant geometric blueprint shapes */}
-                <div className="preloader-bg-shape shape-circle" />
-                <div className="preloader-bg-shape shape-square" />
-                <div className="preloader-bg-shape shape-triangle" />
-                <div className="preloader-bg-shape shape-grid" />
+            {/* Ambient glow */}
+            <div style={{
+                position: 'absolute',
+                width: '300px',
+                height: '300px',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(247,103,0,0.25) 0%, transparent 70%)',
+                animation: 'glow-pulse 2.5s ease-in-out infinite',
+                pointerEvents: 'none',
+            }} />
+
+            {/* Outer spinner ring */}
+            <div style={{
+                position: 'relative',
+                width: '140px',
+                height: '140px',
+                marginBottom: '1.75rem',
+            }}>
+                {/* Ring 1 - outer */}
+                <div style={{
+                    position: 'absolute', inset: 0,
+                    borderRadius: '50%',
+                    border: '2px solid transparent',
+                    borderTopColor: '#f76700',
+                    borderRightColor: 'rgba(247,103,0,0.3)',
+                    animation: 'ring-spin-1 1.2s linear infinite',
+                }} />
+                {/* Ring 2 - inner */}
+                <div style={{
+                    position: 'absolute', inset: '14px',
+                    borderRadius: '50%',
+                    border: '2px solid transparent',
+                    borderTopColor: 'rgba(255,183,3,0.8)',
+                    borderLeftColor: 'rgba(255,183,3,0.3)',
+                    animation: 'ring-spin-2 0.9s linear infinite',
+                }} />
+                {/* Logo in center */}
+                <div style={{
+                    position: 'absolute', inset: '28px',
+                    borderRadius: '50%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: 'rgba(255,255,255,0.04)',
+                    animation: 'logo-appear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both',
+                }}>
+                    <img
+                        src="/IMG_2556.PNG"
+                        alt="NoteXchangE"
+                        style={{
+                            width: '52px', height: '52px',
+                            objectFit: 'contain',
+                            borderRadius: '12px',
+                            filter: 'drop-shadow(0 0 12px rgba(247,103,0,0.5))',
+                        }}
+                    />
+                </div>
             </div>
 
-            <div ref={contentRef} className="app-preloader-inner">
-                {/* Pulsing micro indicators */}
-                <div className="preloader-pulse-dots" aria-hidden>
-                    <span className="pulse-dot dot-orange" />
-                    <span className="pulse-dot dot-orange-glow" />
-                    <span className="pulse-dot dot-orange" />
-                </div>
+            {/* App name */}
+            <div style={{
+                display: 'flex', alignItems: 'center',
+                fontSize: '2rem', fontWeight: 800,
+                letterSpacing: '-0.03em', color: 'white',
+                fontFamily: "'Space Grotesk', 'Inter', sans-serif",
+                marginBottom: '0.5rem',
+                animation: 'text-appear 0.7s ease 0.5s both',
+            }}>
+                <span>Note</span>
+                <span style={{ color: '#f76700', margin: '0 1px' }}>X</span>
+                <span>chang</span>
+                <span style={{ color: '#f76700' }}>E</span>
+            </div>
 
-                {/* Brand Logo Header */}
-                <div className="preloader-brand">
-                    <span ref={noteRef} className="preloader-letter preloader-note">Note</span>
-                    <span ref={xRef} className="preloader-letter preloader-x">X</span>
-                    <span ref={changeRef} className="preloader-letter preloader-change">changE</span>
-                </div>
+            {/* Tagline */}
+            <p style={{
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                letterSpacing: '0.2em',
+                color: 'rgba(255,255,255,0.35)',
+                textTransform: 'uppercase',
+                marginBottom: '2rem',
+                animation: 'text-appear 0.7s ease 0.7s both',
+            }}>
+                Connect · Collaborate · Complete
+            </p>
 
-                {/* Subtitle Tagline */}
-                <p ref={taglineRef} className="preloader-tagline">
-                    Connect · Collaborate · Complete
-                </p>
-
-                {/* Progress bar track */}
-                <div className="preloader-bar-track">
-                    <div ref={barRef} className="preloader-bar-fill" />
-                </div>
+            {/* Loading bar */}
+            <div style={{
+                width: '180px',
+                height: '3px',
+                background: 'rgba(255,255,255,0.08)',
+                borderRadius: '999px',
+                overflow: 'hidden',
+                animation: 'text-appear 0.5s ease 0.8s both',
+            }}>
+                <div style={{
+                    height: '100%',
+                    width: '0%',
+                    background: 'linear-gradient(90deg, #f76700, #ffb703)',
+                    borderRadius: '999px',
+                    animation: 'bar-fill 2.2s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards',
+                }} />
             </div>
         </div>
     );
