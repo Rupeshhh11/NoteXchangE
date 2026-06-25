@@ -17,6 +17,8 @@ interface TaskCardProps {
         collegeName?: string;
         createdAt?: string;
     };
+    onViewDetails: (task: any) => void;
+    onAcquire: (task: any) => void;
 }
 
 function getCategoryMeta(category: string) {
@@ -43,7 +45,7 @@ function timeAgo(dateStr?: string) {
     return `${Math.floor(h / 24)}d ago`;
 }
 
-export default function TaskCard({ task }: TaskCardProps) {
+export default function TaskCard({ task, onViewDetails, onAcquire }: TaskCardProps) {
     const { label, Icon, color } = getCategoryMeta(task.category);
 
     return (
@@ -99,12 +101,20 @@ export default function TaskCard({ task }: TaskCardProps) {
 
             {/* Footer actions */}
             <div className="tc-footer">
-                <Link to={`/tasks/${task.id}`} className="tc-link">
+                <button 
+                    onClick={() => onViewDetails(task)} 
+                    className="tc-link"
+                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+                >
                     View Details
-                </Link>
-                <Link to={`/tasks/${task.id}`} className="tc-acquire-btn">
+                </button>
+                <button 
+                    onClick={() => onAcquire(task)} 
+                    className="tc-acquire-btn"
+                    style={{ border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+                >
                     Acquire It ✦
-                </Link>
+                </button>
             </div>
         </div>
     );
