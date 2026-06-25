@@ -7,18 +7,19 @@ export default function Footer() {
 
                 {/* Brand */}
                 <div className="footer-brand">
-                    <div className="logo-group">
-                        <div className="logo-icon">
-                            <img src="/IMG_2556.PNG" alt="NoteXchangE Logo" style={{ width: '100%', height: '100%', borderRadius: '0.5rem' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.9rem' }}>
+                        <div style={{
+                            width: '36px', height: '36px', borderRadius: '10px', overflow: 'hidden',
+                            boxShadow: '0 2px 8px rgba(247,103,0,0.25)', flexShrink: 0
+                        }}>
+                            <img src="/IMG_2556.PNG" alt="NoteXchangE" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
-                        <span className="logo-text">
-                            Note<span className="logo-x">X</span><span className="logotext">changE</span>
+                        <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.3rem', fontWeight: 800, letterSpacing: '-0.025em', color: 'white' }}>
+                            Note<span style={{ color: '#f76700' }}>X</span>chang<span style={{ color: '#f76700' }}>E</span>
                         </span>
                     </div>
                     <p className="footer-desc">
-                        Is a student-first platform for exchanging notes, assignments, and projects. It connects students
-                        who need academic work with others who assist in completing it, creating a reliable environment where
-                        students can earn by helping one another.
+                    Is a student-first platform for academic collaboration. It connects students who need help with their academic work (written manuals, assignments, labs, projects) with other students who assist in completing them, creating a secure environment where students can earn by helping one another.
                     </p>
                 </div>
 
