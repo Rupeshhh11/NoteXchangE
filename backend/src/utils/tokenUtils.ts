@@ -7,13 +7,13 @@ export const generateTokens = (userId: string, userRole: string) => {
     const accessToken = jwt.sign(
         { id: userId, role: userRole },
         process.env.JWT_SECRET || 'secret',
-        { expiresIn: process.env.JWT_EXPIRY || '7d' }
+        { expiresIn: (process.env.JWT_EXPIRY || '7d') as any }
     );
 
     const refreshToken = jwt.sign(
         { id: userId },
         process.env.REFRESH_TOKEN_SECRET || 'refresh-secret',
-        { expiresIn: process.env.REFRESH_TOKEN_EXPIRY || '30d' }
+        { expiresIn: (process.env.REFRESH_TOKEN_EXPIRY || '30d') as any }
     );
 
     return { accessToken, refreshToken };
