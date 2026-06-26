@@ -88,7 +88,13 @@ export default function AuthModal() {
             return;
         }
         try {
-            await register(signupEmail.trim(), signupPassword, firstName.trim(), lastName.trim(), role);
+            await register(
+                signupEmail.trim(), 
+                signupPassword, 
+                firstName.trim(), 
+                lastName.trim(), 
+                role
+            );
             handleClose();
         } catch {
             /* toast handled in useAuth */
