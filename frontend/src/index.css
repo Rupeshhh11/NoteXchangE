@@ -149,31 +149,8 @@ body {
 
 }
 
-/* Mobile Bottom Navbar */
-@media (max-width: 767px) {
-    .main-header {
-        position: fixed;
-        top: auto;
-        bottom: 1rem;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 92%;
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.4);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        padding: 0.5rem;
-    }
+/* Mobile Bottom Navbar  */
 
-    .header-container {
-        height: 3.5rem;
-        padding: 0 0.5rem;
-    }
-
-    body {
-        padding-bottom: 6rem;
-        /* Make space for bottom nav */
-    }
-}
 
 .logo-group {
     display: flex;
@@ -263,15 +240,6 @@ body {
 
 .nav-link:hover::after {
     width: 100%;
-}
-
-
-
-/* Enhanced navbar for better UX */
-@media (min-width: 768px) {
-    .main-nav {
-        display: flex;
-    }
 }
 
 /* Theme Toggle Button */
@@ -642,12 +610,7 @@ body.dark-mode .theme-toggle-btn:hover {
 
 
 
-@media (min-width: 768px) {
-    .hero-title {
-        font-size: 4.55rem;
 
-    }
-}
 
 .hero-description {
     font-size: 1.25rem;
@@ -3103,15 +3066,24 @@ body.dark-mode .category-card:hover .card-title {
 }
 
 body.dark-mode .theme-toggle-btn {
-    color: #f7bd00;
+    color: #ffffff;
 }
+
+:root.theme-toggle-btn {
+    color: #000;
+}
+
+
 
 /* Mobile Bottom Navigation Bar Styles */
 .mobile-bottom-nav {
     display: none;
 }
 
+
+
 @media (max-width: 767px) {
+
     .mobile-bottom-nav {
         display: flex;
         position: fixed;
@@ -3166,5 +3138,60 @@ body.dark-mode .theme-toggle-btn {
 
     body {
         padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+    }
+
+
+
+
+    /* nav bar  */
+
+    .main-header {
+        position: fixed;
+        top: auto;
+
+        left: 50%;
+        transform: translateX(-50%);
+        width: 92%;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        padding: 0.5rem;
+    }
+
+    .logo-text {
+        right: 1px;
+        font-size: 1.7rem;
+
+    }
+
+    .logo-x {
+        font-size: 1.9rem;
+    }
+
+
+    .desktop-only-name {
+        display: none;
+    }
+
+    .main-nav {
+        display: none !important;
+    }
+
+    .header-container {
+        height: 3.5rem;
+        padding: 0 0.5rem;
+    }
+
+    /* first page  */
+
+    .hero-section {
+        padding-top: 4rem;
+    }
+
+    .hero-description {
+        font-size: 1.1rem;
+        padding: 0 1.5rem;
+
+
     }
 }
