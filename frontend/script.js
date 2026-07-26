@@ -38,11 +38,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         list.forEach(r => {
             const el = document.createElement('div');
-            
+
             // Map category to a class color and standard names
             let catClass = 'cat-other';
             let catIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>`;
-            
+
             const lowerCat = (r.category || '').toLowerCase();
             if (lowerCat.includes('note')) {
                 catClass = 'cat-notes';
@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
         requestForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const form = new FormData(requestForm);
-            
+
             // Map form value to category display name
             const formCategory = form.get('category') || 'other';
             let catName = 'Other';
@@ -234,33 +234,33 @@ document.addEventListener('DOMContentLoaded', () => {
             const subject = form.get('subject') || 'Untitled Subject';
             const pages = form.get('pages') || 'N/A';
             const budget = form.get('budget') || 0;
-            const item = { 
-                id: Date.now(), 
-                category: catName, 
-                title: subject, 
-                pages: pages, 
-                budget: budget, 
-                postedBy: 'You • Just now' 
+            const item = {
+                id: Date.now(),
+                category: catName,
+                title: subject,
+                pages: pages,
+                budget: budget,
+                postedBy: 'You • Just now'
             };
             requests.unshift(item);
             save();
-            
+
             // Remove active category card highlights
             document.querySelectorAll('.category-card').forEach(c => c.classList.remove('active'));
-            
+
             renderRequests(null);
             closeModal(requestModal, requestTl);
             requestForm.reset();
         });
     }
 
-    // Initial render and small GSAP hero animations
+    // GSAP hero animations
     renderRequests(null);
     if (gsap) {
         try {
             gsap.from('.hero-title', { y: 20, opacity: 0, duration: 0.8, ease: 'power2.out' });
             gsap.from('.hero-description', { y: 20, opacity: 0, duration: 0.8, delay: 0.2, ease: 'power2.out' });
             gsap.from('.hero-actions', { y: 20, opacity: 0, duration: 0.8, delay: 0.4, ease: 'power2.out' });
-        } catch (e) { /* ignore */ }
+        } catch (e) { }
     }
 });
